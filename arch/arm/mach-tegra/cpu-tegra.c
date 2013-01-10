@@ -51,9 +51,11 @@
 #define SYSTEM_NORMAL_MODE	(0)
 #define SYSTEM_BALANCE_MODE	(1)
 #define SYSTEM_PWRSAVE_MODE	(2)
-#define SYSTEM_MODE_END 		(SYSTEM_PWRSAVE_MODE + 1)
+#define SYSTEM_OVERCLOCK_0P1G_MODE (4)
+#define SYSTEM_MODE_END 		(SYSTEM_OVERCLOCK_0P1G_MODE + 1)
 #define SYSTEM_PWRSAVE_MODE_MAX_FREQ	(1000000)
-unsigned int power_mode_table[SYSTEM_MODE_END] = {1000000,1200000,1400000};
+#define ASUS_OVERCLOCK
+unsigned int power_mode_table[SYSTEM_MODE_END] = {1000000,1200000,1400000,1500000};
 
 #define CAMERA_ENABLE_EMC_MINMIAM_RATE (667000000)
 /* tegra throttling and edp governors require frequencies in the table
@@ -63,6 +65,7 @@ static unsigned int freq_table_size=0;;
 static struct clk *cpu_clk;
 static struct clk *emc_clk;
 
+static bool edp_enable = 0;
 static unsigned long policy_max_speed[CONFIG_NR_CPUS];
 static unsigned long target_cpu_speed[CONFIG_NR_CPUS];
 static DEFINE_MUTEX(tegra_cpu_lock);
@@ -265,10 +268,13 @@ static int system_mode_set(const char *arg, const struct kernel_param *kp)
 	ret = param_set_int(arg, kp);
 	if (ret == 0) {
 		printk("system_mode_set system_mode=%u\n",system_mode);
-
+#ifdef ASUS_OVERCLOCK
+		if((system_mode < SYSTEM_NORMAL_MODE) || (system_mode > SYSTEM_OVERCLOCK_0P1G_MODE))
+			system_mode = SYSTEM_NORMAL_MODE;
+#else
 		if((system_mode < SYSTEM_NORMAL_MODE) || (system_mode > SYSTEM_PWRSAVE_MODE))
 			system_mode = SYSTEM_NORMAL_MODE;
-
+#endif
 		tegra_cpu_set_speed_cap(NULL);
 	}
 
@@ -341,7 +347,11 @@ module_param_cb(enable_pwr_save, &tegra_pwr_save_ops, &pwr_save, 0644);
 		new_speed = power_mode_table[SYSTEM_PWRSAVE_MODE];
 	else  if((system_mode == SYSTEM_NORMAL_MODE) && (requested_speed > power_mode_table[SYSTEM_NORMAL_MODE]))
 		new_speed = power_mode_table[SYSTEM_NORMAL_MODE];
-
+#ifdef ASUS_OVERCLOCK
+	else if(( system_mode == SYSTEM_OVERCLOCK_0P1G_MODE ) &&
+(requested_speed > power_mode_table[SYSTEM_OVERCLOCK_0P1G_MODE]))
+		new_speed = power_mode_table[SYSTEM_OVERCLOCK_0P1G_MODE];
+#endif
 	return new_speed;
 }
 
@@ -483,7 +493,13 @@ int tegra_edp_update_thermal_zone(int temperature)
 	int ret = 0;
 	int nlimits = cpu_edp_limits_size;
 	int index;
-
+#ifdef ASUS_OVERCLOCK
+	if(temperature >=75 && temperature < 85) {
+		edp_enable=1;
+	} else {
+		edp_enable = 0;
+	}
+#endif
 	if (!cpu_edp_limits)
 		return -EINVAL;
 
@@ -911,8 +927,18 @@ int tegra_cpu_set_speed_cap(unsigned int *speed_cap)
 
        new_speed = ASUS_governor_speed(new_speed);
 	new_speed = tegra_throttle_governor_speed(new_speed);
+#ifdef ASUS_OVERCLOCK
+	if(system_mode == SYSTEM_OVERCLOCK_0P1G_MODE ) {
+		if(edp_enable) {
+			pr_info("%s : EDP enable\n", __func__);
+			new_speed = edp_governor_speed(new_speed);
+		}
+	} else {
+		new_speed = edp_governor_speed(new_speed);
+	}
+#else
 	new_speed = edp_governor_speed(new_speed);
-
+#endif
 	//new_speed = user_cap_speed(new_speed);
 	if (speed_cap)
 		*speed_cap = new_speed;
@@ -932,7 +958,18 @@ int tegra_suspended_target(unsigned int target_freq)
 
 	/* apply only "hard" caps */
 	new_speed = tegra_throttle_governor_speed(new_speed);
+#ifdef ASUS_OVERCLOCK
+	if(system_mode == SYSTEM_OVERCLOCK_0P1G_MODE) {
+		if(edp_enable) {
+			pr_info("%s : EDP enable\n", __func__);
+			new_speed = edp_governor_speed(new_speed);
+		}
+	} else
+		new_speed = edp_governor_speed(new_speed);
+#else
 	new_speed = edp_governor_speed(new_speed);
+#endif
+
 
 	return tegra_update_cpu_speed(new_speed);
 }

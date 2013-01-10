@@ -220,9 +220,13 @@ static void rev_sku_to_speedo_ids(int rev, int sku)
 		case 0x80: /* T33 or T33S */
 			switch (package_id) {
 			case 1: /* MID => T33 */
-				cpu_speedo_id = 5;
+/* cpu_speedo_id = 5;
 				soc_speedo_id = 2;
 				threshold_index = 8;
+ORIGINAL */
+				cpu_speedo_id = 12;
+				soc_speedo_id = 2;
+				threshold_index = 9;
 				break;
 			case 2: /* DSC => T33S */
 				cpu_speedo_id = 6;
@@ -540,8 +544,8 @@ int tegra_package_id(void)
  */
 static const int cpu_speedo_nominal_millivolts[] =
 /* speedo_id 0,    1,    2,    3,    4,    5,    6,    7,    8,   9,  10,  11,   12,    13,  14,  15 */
-	{ 1125, 1150, 1150, 1150, 1237, 1237, 1237, 1150, 1150, 1007, 916, 850, 1237, 1237, 950, 900};
-
+/*	{ 1125, 1150, 1150, 1150, 1237, 1237, 1237, 1150, 1150, 1007, 916, 850, 1237, 1237, 950, 900}; ORIGINAL */
+{ 1125, 1150, 1150, 1150, 1237, 1350, 1237, 1150, 1150, 1007, 916, 850, 1325, 1237, 950, 900};
 int tegra_cpu_speedo_mv(void)
 {
 	BUG_ON(cpu_speedo_id >= ARRAY_SIZE(cpu_speedo_nominal_millivolts));
@@ -559,7 +563,7 @@ int tegra_core_speedo_mv(void)
 		/* fall thru for T30L or T30SL */
 	case 2:
 		if (cpu_speedo_id != 13)
-			return 1300;
+			return 1350; //ORIGINAL 1300
 		/* T37 */
 		return 1350;
 	case 3:
