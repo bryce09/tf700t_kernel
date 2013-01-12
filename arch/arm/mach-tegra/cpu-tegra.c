@@ -269,9 +269,10 @@ static int system_mode_set(const char *arg, const struct kernel_param *kp)
 	if (ret == 0) {
 		printk("system_mode_set system_mode=%u\n",system_mode);
 #ifdef ASUS_OVERCLOCK
-		if((system_mode < SYSTEM_NORMAL_MODE) || (system_mode > SYSTEM_OVERCLOCK_0P1G_MODE))
-			system_mode = SYSTEM_NORMAL_MODE;
+		if( (system_mode < SYSTEM_NORMAL_MODE) || (system_mode > SYSTEM_OVERCLOCK_0P1G_MODE))
+			system_mode=SYSTEM_NORMAL_MODE;
 #else
+
 		if((system_mode < SYSTEM_NORMAL_MODE) || (system_mode > SYSTEM_PWRSAVE_MODE))
 			system_mode = SYSTEM_NORMAL_MODE;
 #endif
@@ -381,7 +382,7 @@ void tegra_cpu_user_cap_set(unsigned int speed_khz)
 	_cpu_user_cap_set_locked();
 
 	mutex_unlock(&tegra_cpu_lock);
-}
+} 
 
 static int cpu_user_cap_set(const char *arg, const struct kernel_param *kp)
 {
@@ -494,7 +495,7 @@ int tegra_edp_update_thermal_zone(int temperature)
 	int nlimits = cpu_edp_limits_size;
 	int index;
 #ifdef ASUS_OVERCLOCK
-	if(temperature >=75 && temperature < 85) {
+	if(temperature >= 75 && temperature < 85) {
 		edp_enable=1;
 	} else {
 		edp_enable = 0;
@@ -708,10 +709,11 @@ static int pwr_mode_table_debugfs_show(struct seq_file *s, void *data)
 	int i;
 
 	seq_printf(s, "-- CPU power mode table --\n");
-	seq_printf(s, "Power Saving=%u \n Balanced=%u \n Normal=%u \n \n",
+	seq_printf(s, "Power Saving=%u \n Balanced=%u \n Normal=%u \n Over 1=%u \n \n",
 			   power_mode_table[2],
 			   power_mode_table[1],
-			   power_mode_table[0]);
+			   power_mode_table[0],
+			   power_mode_table[3]);
 	return 0;
 }
 
@@ -774,9 +776,9 @@ static int __init tegra_cpu_debug_init(void)
 
 	if (tegra_edp_debug_init(cpu_tegra_debugfs_root))
 		goto err_out;
-        if (!debugfs_create_file("pwr_mode_table", 0644, cpu_tegra_debugfs_root,
+        /*if (!debugfs_create_file("pwr_mode_table", 0644, cpu_tegra_debugfs_root,
 		 NULL, &pwr_mode_table_debugfs_fops))
-		goto err_out;
+		goto err_out;*/
 
 	return 0;
 
@@ -1046,6 +1048,7 @@ void rebuild_max_freq_table(max_rate)
 	power_mode_table[SYSTEM_NORMAL_MODE] = max_rate;
 	power_mode_table[SYSTEM_BALANCE_MODE] = max_rate - 200000;
 	power_mode_table[SYSTEM_PWRSAVE_MODE] = SYSTEM_PWRSAVE_MODE_MAX_FREQ;
+	power_mode_table[SYSTEM_OVERCLOCK_0P1G_MODE]=max_rate + 100000;
 }
 
 static int tegra_cpu_init(struct cpufreq_policy *policy)
