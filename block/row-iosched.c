@@ -58,8 +58,6 @@ static const bool queue_idling_enabled[] = {
 	false,	/* ROWQ_PRIO_LOW_SWRITE */
 };
 
-<<<<<<< HEAD
-=======
 /* Flags indicating whether the queue can notify on urgent requests */
 static const bool urgent_queues[] = {
 	true,	/* ROWQ_PRIO_HIGH_READ */
@@ -71,7 +69,6 @@ static const bool urgent_queues[] = {
 	false,	/* ROWQ_PRIO_LOW_SWRITE */
 };
 
->>>>>>> e2f452f8b40332bd09a5c3ac2bf73b578ffb997b
 /* Default values for row queues quantums in each dispatch cycle */
 static const int queue_quantum[] = {
 	100,	/* ROWQ_PRIO_HIGH_READ */
@@ -83,15 +80,9 @@ static const int queue_quantum[] = {
 	1	/* ROWQ_PRIO_LOW_SWRITE */
 };
 
-<<<<<<< HEAD
-/* Default values for idling on read queues */
-#define ROW_IDLE_TIME_MSEC 5	/* msec */
-#define ROW_READ_FREQ_MSEC 20	/* msec */
-=======
 /* Default values for idling on read queues (in msec) */
 #define ROW_IDLE_TIME_MSEC 5
 #define ROW_READ_FREQ_MSEC 20
->>>>>>> e2f452f8b40332bd09a5c3ac2bf73b578ffb997b
 
 /**
  * struct rowq_idling_data -  parameters for idling on the queue
@@ -291,12 +282,6 @@ static void row_add_request(struct request_queue *q,
 
 		rqueue->idle_data.last_insert_time = ktime_get();
 	}
-<<<<<<< HEAD
-	row_log_rowq(rd, rqueue->prio, "added request");
-}
-
-/*
-=======
 	if (urgent_queues[rqueue->prio] &&
 	    row_rowq_unserved(rd, rqueue->prio)) {
 		row_log_rowq(rd, rqueue->prio,
@@ -361,7 +346,6 @@ static bool row_urgent_pending(struct request_queue *q)
 }
 
 /**
->>>>>>> e2f452f8b40332bd09a5c3ac2bf73b578ffb997b
  * row_remove_request() -  Remove given request from scheduler
  * @q:	requests queue
  * @rq:	request to remove
@@ -751,11 +735,8 @@ static struct elevator_type iosched_row = {
 		.elevator_merge_req_fn		= row_merged_requests,
 		.elevator_dispatch_fn		= row_dispatch_requests,
 		.elevator_add_req_fn		= row_add_request,
-<<<<<<< HEAD
-=======
 		.elevator_reinsert_req_fn	= row_reinsert_req,
 		.elevator_is_urgent_fn		= row_urgent_pending,
->>>>>>> e2f452f8b40332bd09a5c3ac2bf73b578ffb997b
 		.elevator_former_req_fn		= elv_rb_former_request,
 		.elevator_latter_req_fn		= elv_rb_latter_request,
 		.elevator_set_req_fn		= row_set_request,
@@ -783,8 +764,4 @@ module_init(row_init);
 module_exit(row_exit);
 
 MODULE_LICENSE("GPLv2");
-<<<<<<< HEAD
 MODULE_DESCRIPTION("Read Over Write IO scheduler");
-=======
-MODULE_DESCRIPTION("Read Over Write IO scheduler");
->>>>>>> e2f452f8b40332bd09a5c3ac2bf73b578ffb997b
