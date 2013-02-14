@@ -544,8 +544,9 @@ int tegra_package_id(void)
  */
 static const int cpu_speedo_nominal_millivolts[] =
 /* speedo_id 0,    1,    2,    3,    4,    5,    6,    7,    8,   9,  10,  11,   12,    13,  14,  15 */
-/*	{ 1125, 1150, 1150, 1150, 1237, 1237, 1237, 1150, 1150, 1007, 916, 850, 1237, 1237, 950, 900}; ORIGINAL */
-{ 1125, 1150, 1150, 1150, 1237, 1350, 1237, 1150, 1150, 1007, 916, 850, 1325, 1237, 950, 900};
+/*	{ 1125, 1150, 1150, 1150, 1237, 1237, 1237, 1150, 1150, 1007, 916, 850, 1237, 1237, 950, 900}; 
+{ 1125, 1150, 1150, 1150, 1237, 1350, 1237, 1150, 1150, 1007, 916, 850, 1325, 1237, 950, 900};ORIGINAL */
+{ 1125, 1350, 1350, 1350, 1237, 1350, 1237, 1350, 1150, 1007, 916, 850, 1350, 950, 900 };
 int tegra_cpu_speedo_mv(void)
 {
 	BUG_ON(cpu_speedo_id >= ARRAY_SIZE(cpu_speedo_nominal_millivolts));
@@ -556,10 +557,10 @@ int tegra_core_speedo_mv(void)
 {
 	switch (soc_speedo_id) {
 	case 0:
-		return 1200;
+		return 1350;
 	case 1:
 		if ((cpu_speedo_id != 7) && (cpu_speedo_id != 8))
-			return 1200;
+			return 1350;
 		/* fall thru for T30L or T30SL */
 	case 2:
 		if (cpu_speedo_id != 13)
@@ -567,7 +568,7 @@ int tegra_core_speedo_mv(void)
 		/* T37 */
 		return 1350;
 	case 3:
-		return 1250;
+		return 1350;
 	default:
 		BUG();
 	}
