@@ -36,6 +36,7 @@
 #include "../../arch/arm/mach-tegra/clock.h"
 #include "../../arch/arm/mach-tegra/dvfs.h"
 
+static DEFINE_MUTEX(dvfs_lock);
 /**
  * The "cpufreq driver" - the arch- or hardware-dependent low
  * level driver of CPUFreq support, and its spinlock. This lock
@@ -603,19 +604,24 @@ static ssize_t show_gpu_oc(struct cpufreq_policy *policy, char *buf)
 {
 	char *c = buf;
 	struct clk *gpu = tegra_get_clock_by_name("3d");
-	int i = gpu->dvfs->num_freqs;
+	unsigned int i = gpu->dvfs->num_freqs;
+	//unsigned long gpu_freq = 0;
 
 	if(i == 0)
 		return -EINVAL;
-	for(i--; i>= 1 ; i--)
-		c += sprintf(c, "%lu ", gpu->dvfs->freqs[i]/1000000);
+	for(i--; i>= 5 ; i--)
+		c += sprintf(c, "%lu ", gpu->dvfs->freqs[i]/1000000);		
+		//gpu_freq = gpu->dvfs->freqs[i]/1000000;
+	//return sprintf(c, "%lu ", gpu_freq);
+	
 	return c - buf;
 }
 
 static ssize_t store_gpu_oc(struct cpufreq_policy *policy, const char *buf, ssize_t count)
 {
 	int ret;
-	unsigned long gpu_freq;
+	unsigned long gpu_freq = 0;
+	unsigned int i = 0;
 
 	struct clk *vde = tegra_get_clock_by_name("vde");
 	struct clk *mpe = tegra_get_clock_by_name("mpe");
@@ -625,29 +631,47 @@ static ssize_t store_gpu_oc(struct cpufreq_policy *policy, const char *buf, ssiz
 	struct clk *three_d2 = tegra_get_clock_by_name("3d2");
 	struct clk *se = tegra_get_clock_by_name("se");
 	struct clk *cbus = tegra_get_clock_by_name("cbus");
+	struct clk *host1x = tegra_get_clock_by_name("host1x");
+	struct clk *pll_c = tegra_get_clock_by_name("pll_c");
 
-	const int array_size = vde->dvfs->num_freqs;
+	unsigned int array_size = vde->dvfs->num_freqs;
 	char cur_size[array_size];
-	int i = array_size;
+	i = array_size;
 
 	if(i == 0)
 		return -EINVAL;
 
-	for(i--; i >= 1; i--)
-	{
-		ret = sscanf(buf, "%lu", &gpu_freq);
+	ret = sscanf(buf, "%lu", &gpu_freq);
 
-		if(i== array_size -1)
+	vde->max_rate = gpu_freq * 1000000;
+	mpe->max_rate = gpu_freq * 1000000;
+	two_d->max_rate = gpu_freq * 1000000;
+	epp->max_rate = gpu_freq * 1000000;
+	three_d->max_rate = gpu_freq * 1000000;
+	three_d2->max_rate = gpu_freq * 1000000;
+	se->max_rate = gpu_freq * 1000000;
+	cbus->max_rate = gpu_freq * 1000000;
+	host1x->max_rate = DIV_ROUND_UP((gpu_freq * 1000000),2);
+	pll_c->max_rate = ((gpu_freq * 1000000)*2);
+	pr_info("Set clk-> max_rate  %d to gpu_freq %lu \nPLL_C max rate %lu\n", i, gpu_freq, pll_c->max_rate);
+
+	for(i--; i >= 8; i--)
+	{
+		mutex_lock(&dvfs_lock);
+		if (gpu_freq < 600) 
 		{
-			vde->max_rate = gpu_freq * 1000000;
-			mpe->max_rate = gpu_freq * 1000000;
-			two_d->max_rate = gpu_freq * 1000000;
-			epp->max_rate = gpu_freq * 1000000;
-			three_d->max_rate = gpu_freq * 1000000;
-			three_d2->max_rate = gpu_freq * 1000000;
-			se->max_rate = gpu_freq * 1000000;
-			cbus->max_rate = gpu_freq * 1000000;
-			pr_info("Set clk-> max_rate  %d to gpu_freq %lu \n", i, gpu_freq);
+			//vde->dvfs->millivolts[i] = 1350;
+			pr_info("NEW VOLT < 600 %d\n" , vde->dvfs->millivolts[i]);
+		}
+		else if(gpu_freq >= 600 && gpu_freq < 700)
+		{
+			//vde->dvfs->millivolts[i] = 1350;
+			pr_info("NEW VOLT 600 - 700 %d\n" , vde->dvfs->millivolts[i]);
+		}
+		else if(gpu_freq >= 700)
+		{
+			//vde->dvfs->millivolts[i] = 1400;
+			pr_info("NEW VOLT >= 700 %d\n" , vde->dvfs->millivolts[i]);
 		}
 		vde->dvfs->freqs[i] = gpu_freq * 1000000;
 		mpe->dvfs->freqs[i] = gpu_freq * 1000000;
@@ -657,14 +681,17 @@ static ssize_t store_gpu_oc(struct cpufreq_policy *policy, const char *buf, ssiz
 		three_d2->dvfs->freqs[i] = gpu_freq * 1000000;
 		se->dvfs->freqs[i] = gpu_freq * 1000000;
 		cbus->dvfs->freqs[i] = gpu_freq * 1000000;
+		pll_c->dvfs->freqs[i] = ((gpu_freq * 1000000)*2);
 
-		ret = sscanf(buf, "%s", cur_size);
-	
-		if(ret == 0) return 0;
-
-		buf += (strlen(cur_size) +1 );
+		pr_info("PLL_C max freq %lu\n", pll_c->dvfs->freqs[i]);
+		
+		mutex_unlock(&dvfs_lock);
 	}
-			
+	ret = sscanf(buf, "%s", cur_size);
+	
+	if(ret == 0) return -EINVAL;
+
+	buf += (strlen(cur_size) +1 );		
 	return count;
 }
 
