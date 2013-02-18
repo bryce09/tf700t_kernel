@@ -1049,7 +1049,7 @@ void rebuild_max_freq_table(max_rate)
 	power_mode_table[SYSTEM_NORMAL_MODE] = max_rate;
 	power_mode_table[SYSTEM_BALANCE_MODE] = max_rate - 200000;
 	power_mode_table[SYSTEM_PWRSAVE_MODE] = SYSTEM_PWRSAVE_MODE_MAX_FREQ;
-	power_mode_table[SYSTEM_OVERCLOCK_0P1G_MODE]=max_rate + 100000;
+	power_mode_table[SYSTEM_OVERCLOCK_0P1G_MODE]=1900000;
 }
 
 static int tegra_cpu_init(struct cpufreq_policy *policy)
