@@ -53,7 +53,7 @@ static bool earlysuspend_active = false;
 static unsigned int enable_all_load_threshold __read_mostly = 375;
 static unsigned int enable_load_threshold __read_mostly = 275;
 static unsigned int disable_load_threshold __read_mostly = 125;
-static bool quad_core_mode __read_mostly = false;
+static bool quad_core_mode __read_mostly = true;
 static bool hotplug_routines __read_mostly = true;
 
 module_param(enable_all_load_threshold, int, 0775);

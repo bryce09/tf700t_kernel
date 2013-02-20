@@ -89,11 +89,11 @@ static struct cpufreq_interactive_core_lock core_lock;
 static u64 hispeed_freq;
 
 /* Boost frequency by boost_factor when CPU load at or above this value. */
-#define DEFAULT_GO_MAXSPEED_LOAD 85
+#define DEFAULT_GO_MAXSPEED_LOAD 90
 static unsigned long go_maxspeed_load;
 
 /* Go to hispeed_freq when CPU load at or above this value. */
-#define DEFAULT_GO_HISPEED_LOAD 85
+#define DEFAULT_GO_HISPEED_LOAD 90
 static unsigned long go_hispeed_load;
 
 /* Base of exponential raise to max speed; if 0 - jump to maximum */
@@ -133,7 +133,7 @@ static unsigned long above_hispeed_delay_val;
 /*
  * Boost pulse to hispeed on touchscreen input.
  */
-static int input_boost_val;
+static int input_boost_val = 0;
 
 struct cpufreq_interactive_inputopen {
 	struct input_handle *handle;
