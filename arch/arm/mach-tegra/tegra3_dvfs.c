@@ -65,7 +65,7 @@ static int cpu_below_core = VDD_CPU_BELOW_VDD_CORE;
 static struct dvfs_rail tegra3_dvfs_rail_vdd_cpu = {
 	.reg_id = "vdd_cpu",
 	.max_millivolts = 1350, 
-	.min_millivolts = 725,
+	.min_millivolts = 675,
 	.step = VDD_SAFE_STEP,
 	.jmp_to_zero = true,
 };
