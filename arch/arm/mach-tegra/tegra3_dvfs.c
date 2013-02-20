@@ -42,7 +42,7 @@ static bool tegra_dvfs_cpu_disabled;
 static bool tegra_dvfs_core_disabled;
 static struct dvfs *cpu_dvfs;
 
-static int cpu_millivolts[MAX_DVFS_FREQS] = CPU_MILLIVOLTS;
+int cpu_millivolts[MAX_DVFS_FREQS] = CPU_MILLIVOLTS;
 
 static const int cpu_millivolts_aged[MAX_DVFS_FREQS] = CPU_MILLIVOLTS;
 
