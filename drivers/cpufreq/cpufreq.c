@@ -669,16 +669,15 @@ static ssize_t show_gpu_oc(struct cpufreq_policy *policy, char *buf)
 	char *c = buf;
 	struct clk *gpu = tegra_get_clock_by_name("3d");
 	unsigned int i = gpu->dvfs->num_freqs;
-	//unsigned long gpu_freq = 0;
+	unsigned long gpu_freq = 0;
 
 	if(i == 0)
 		return -EINVAL;
-	for(i--; i>= 5 ; i--)
-		c += sprintf(c, "%lu ", gpu->dvfs->freqs[i]/1000000);		
-		//gpu_freq = gpu->dvfs->freqs[i]/1000000;
-	//return sprintf(c, "%lu ", gpu_freq);
-	
-	return c - buf;
+	for(i--; i>= 8 ; i--)
+		gpu_freq = gpu->dvfs->freqs[i]/1000000;
+
+	return sprintf(c, "%lu ", gpu_freq);
+
 }
 
 static ssize_t store_gpu_oc(struct cpufreq_policy *policy, const char *buf, ssize_t count)
@@ -702,60 +701,64 @@ static ssize_t store_gpu_oc(struct cpufreq_policy *policy, const char *buf, ssiz
 	char cur_size[array_size];
 	i = array_size;
 
+	rcu_read_lock();
+
 	if(i == 0)
 		return -EINVAL;
 
 	ret = sscanf(buf, "%lu", &gpu_freq);
 
-	vde->max_rate = gpu_freq * 1000000;
-	mpe->max_rate = gpu_freq * 1000000;
-	two_d->max_rate = gpu_freq * 1000000;
-	epp->max_rate = gpu_freq * 1000000;
-	three_d->max_rate = gpu_freq * 1000000;
-	three_d2->max_rate = gpu_freq * 1000000;
-	se->max_rate = gpu_freq * 1000000;
-	cbus->max_rate = gpu_freq * 1000000;
-	host1x->max_rate = DIV_ROUND_UP((gpu_freq * 1000000),2);
-	pll_c->max_rate = ((gpu_freq * 1000000)*2);
-	pr_info("Set clk-> max_rate  %d to gpu_freq %lu \nPLL_C max rate %lu\n", i, gpu_freq, pll_c->max_rate);
+	gpu_freq = gpu_freq * 1000000;
+	vde->max_rate = gpu_freq;
+	mpe->max_rate = gpu_freq;
+	two_d->max_rate = gpu_freq;
+	epp->max_rate = gpu_freq;
+	three_d->max_rate = gpu_freq;
+	three_d2->max_rate = gpu_freq;
+	se->max_rate = gpu_freq;
+	cbus->max_rate = gpu_freq;
+	pll_c->max_rate = ((gpu_freq)*2);
+
+	pr_info("Set clk-> max_rate  %d to gpu_freq %lu \n", pll_c->max_rate, gpu_freq / 1000000);
 
 	for(i--; i >= 8; i--)
 	{
-		mutex_lock(&dvfs_lock);
-		if (gpu_freq < 600) 
+		if (gpu_freq <= 650) 
 		{
-			//vde->dvfs->millivolts[i] = 1350;
-			pr_info("NEW VOLT < 600 %d\n" , vde->dvfs->millivolts[i]);
+			vde->dvfs->millivolts[i] = 1350;
+			pr_info("NEW VOLT <= 650 %d\n" , vde->dvfs->millivolts[i]);
 		}
-		else if(gpu_freq >= 600 && gpu_freq < 700)
+		else if(gpu_freq > 650 && gpu_freq <= 700)
 		{
-			//vde->dvfs->millivolts[i] = 1350;
-			pr_info("NEW VOLT 600 - 700 %d\n" , vde->dvfs->millivolts[i]);
+			vde->dvfs->millivolts[i] = 1400;
+			pr_info("NEW VOLT 650 - 700 %d\n" , vde->dvfs->millivolts[i]);
 		}
-		else if(gpu_freq >= 700)
+		else if(gpu_freq > 700)
 		{
-			//vde->dvfs->millivolts[i] = 1400;
-			pr_info("NEW VOLT >= 700 %d\n" , vde->dvfs->millivolts[i]);
+			vde->dvfs->millivolts[i] = 1450;
+			pr_info("NEW VOLT > 700 %d\n" , vde->dvfs->millivolts[i]);
 		}
-		vde->dvfs->freqs[i] = gpu_freq * 1000000;
-		mpe->dvfs->freqs[i] = gpu_freq * 1000000;
-		two_d->dvfs->freqs[i] = gpu_freq * 1000000;
-		epp->dvfs->freqs[i] = gpu_freq * 1000000;
-		three_d->dvfs->freqs[i] = gpu_freq * 1000000;
-		three_d2->dvfs->freqs[i] = gpu_freq * 1000000;
-		se->dvfs->freqs[i] = gpu_freq * 1000000;
-		cbus->dvfs->freqs[i] = gpu_freq * 1000000;
-		pll_c->dvfs->freqs[i] = ((gpu_freq * 1000000)*2);
+		vde->dvfs->freqs[i] = gpu_freq;
+		mpe->dvfs->freqs[i] = gpu_freq;
+		two_d->dvfs->freqs[i] = gpu_freq;
+		epp->dvfs->freqs[i] = gpu_freq;
+		three_d->dvfs->freqs[i] = gpu_freq;
+		three_d2->dvfs->freqs[i] = gpu_freq;
+		se->dvfs->freqs[i] = gpu_freq;
+		cbus->dvfs->freqs[i] = gpu_freq;
+		host1x->dvfs->freqs[i] = DIV_ROUND_UP((gpu_freq),2);
+		pll_c->dvfs->freqs[i] = ((gpu_freq)*2);
 
 		pr_info("PLL_C max freq %lu\n", pll_c->dvfs->freqs[i]);
-		
-		mutex_unlock(&dvfs_lock);
 	}
 	ret = sscanf(buf, "%s", cur_size);
 	
 	if(ret == 0) return -EINVAL;
 
-	buf += (strlen(cur_size) +1 );		
+	buf += (strlen(cur_size) +1 );	
+
+	rcu_read_unlock();
+	
 	return count;
 }
 

@@ -58,7 +58,7 @@
 unsigned int power_mode_table[SYSTEM_MODE_END] = {1000000,1200000,1400000,1500000};
 
 #define CAMERA_ENABLE_EMC_MINMIAM_RATE (667000000)
-#define EMC_MINMIAM_RATE (204000000)
+
 /* tegra throttling and edp governors require frequencies in the table
    to be in ascending order */
 static struct cpufreq_frequency_table *freq_table;
@@ -359,31 +359,7 @@ module_param_cb(enable_pwr_save, &tegra_pwr_save_ops, &pwr_save, 0644);
 
 static unsigned int cpu_user_cap;
 
-static inline void _cpu_user_cap_set_locked(void)
-{
-#ifndef CONFIG_TEGRA_CPU_CAP_EXACT_FREQ
-	if (cpu_user_cap != 0) {
-		int i;
-		for (i = 0; freq_table[i].frequency != CPUFREQ_TABLE_END; i++) {
-			if (freq_table[i].frequency > cpu_user_cap)
-				break;
-		}
-		i = (i == 0) ? 0 : i - 1;
-		cpu_user_cap = freq_table[i].frequency;
-	}
-#endif
-	tegra_cpu_set_speed_cap(NULL);
-}
 
-void tegra_cpu_user_cap_set(unsigned int speed_khz)
-{
-	mutex_lock(&tegra_cpu_lock);
-
-	cpu_user_cap = speed_khz;
-	_cpu_user_cap_set_locked();
-
-	mutex_unlock(&tegra_cpu_lock);
-} 
 
 static int cpu_user_cap_set(const char *arg, const struct kernel_param *kp)
 {
@@ -392,9 +368,21 @@ static int cpu_user_cap_set(const char *arg, const struct kernel_param *kp)
 	mutex_lock(&tegra_cpu_lock);
 
 	ret = param_set_uint(arg, kp);
-	if (ret == 0)
-		_cpu_user_cap_set_locked();
-
+	if (ret == 0) {
+#ifndef CONFIG_TEGRA_CPU_CAP_EXACT_FREQ
+		if (cpu_user_cap != 0) {
+			int i;
+			for (i = 0; freq_table[i].frequency !=
+				CPUFREQ_TABLE_END; i++) {
+				if (freq_table[i].frequency > cpu_user_cap)
+					break;
+			}
+			i = (i == 0) ? 0 : i - 1;
+			cpu_user_cap = freq_table[i].frequency;
+		}
+#endif
+		tegra_cpu_set_speed_cap(NULL);
+	}
 	mutex_unlock(&tegra_cpu_lock);
 	return ret;
 }
@@ -1046,19 +1034,15 @@ static struct notifier_block tegra_cpu_pm_notifier = {
 
 void rebuild_max_freq_table(max_rate)
 {
-	power_mode_table[SYSTEM_NORMAL_MODE] = max_rate;
-	power_mode_table[SYSTEM_BALANCE_MODE] = max_rate - 200000;
+	power_mode_table[SYSTEM_NORMAL_MODE] = 1500000;
+	power_mode_table[SYSTEM_BALANCE_MODE] = 1300000;
 	power_mode_table[SYSTEM_PWRSAVE_MODE] = SYSTEM_PWRSAVE_MODE_MAX_FREQ;
 	power_mode_table[SYSTEM_OVERCLOCK_0P1G_MODE]=1900000;
 }
 
 static int tegra_cpu_init(struct cpufreq_policy *policy)
 {
-        struct clk *c=NULL;
-        unsigned long  cpu_emc_cur_rate = 0;
-        unsigned long  emc_cur_rate = 0;
-
-        c=tegra_get_clock_by_name("emc");
+        
 
 	if (policy->cpu >= CONFIG_NR_CPUS)
 		return -EINVAL;
@@ -1072,24 +1056,6 @@ static int tegra_cpu_init(struct cpufreq_policy *policy)
 		clk_put(cpu_clk);
 		return PTR_ERR(emc_clk);
 	}
-
-        if(!camera_enable)
-        {
-                cpu_emc_cur_rate = clk_get_rate(emc_clk);
-                emc_cur_rate = clk_get_rate(c);
-                printk(" %s : emc_clk->min_rate to 204M\n", __func__);
-                emc_clk->min_rate=EMC_MINMIAM_RATE;
-                c->min_rate=EMC_MINMIAM_RATE;
-
-                if(cpu_emc_cur_rate < emc_clk->min_rate )
-                {
-                        clk_set_rate(emc_clk, EMC_MINMIAM_RATE);
-                }
-                if(emc_cur_rate < c->min_rate )
-                {
-                        clk_set_rate(c, EMC_MINMIAM_RATE);
-                }
-        }
 
 	clk_enable(emc_clk);
 	clk_enable(cpu_clk);
