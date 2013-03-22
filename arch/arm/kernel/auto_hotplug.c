@@ -48,12 +48,12 @@
  */
 #define DEBUG 0
 
-#define CPUS_AVAILABLE		num_possible_cpus()
+#define CPUS_AVAILABLE		4
 /*
  * SAMPLING_PERIODS * MIN_SAMPLING_RATE is the minimum
  * load history which will be averaged
  */
-#define SAMPLING_PERIODS	10
+#define SAMPLING_PERIODS	15
 #define INDEX_MAX_VALUE		(SAMPLING_PERIODS - 1)
 /*
  * MIN_SAMPLING_RATE is scaled based on num_online_cpus()
@@ -68,9 +68,12 @@
  * DISABLE is the load at which a CPU is disabled
  * These two are scaled based on num_online_cpus()
  */
-#define ENABLE_ALL_LOAD_THRESHOLD	(125 * CPUS_AVAILABLE)
-#define ENABLE_LOAD_THRESHOLD		225
-#define DISABLE_LOAD_THRESHOLD		60
+/*
+#define ENABLE_ALL_LOAD_THRESHOLD	(325 * CPUS_AVAILABLE)
+#define ENABLE_LOAD_THRESHOLD		275
+#define DISABLE_LOAD_THRESHOLD		100
+
+*/
 
 /* Control flags */
 unsigned char flags;
@@ -86,6 +89,14 @@ struct work_struct hotplug_online_single_work;
 struct delayed_work hotplug_offline_work;
 struct work_struct hotplug_offline_all_work;
 struct work_struct hotplug_boost_online_work;
+
+static unsigned int ENABLE_ALL_LOAD_THRESHOLD __read_mostly = 375;
+static unsigned int ENABLE_LOAD_THRESHOLD __read_mostly = 275;
+static unsigned int DISABLE_LOAD_THRESHOLD __read_mostly = 125;
+
+module_param(ENABLE_ALL_LOAD_THRESHOLD, int, 0775);
+module_param(ENABLE_LOAD_THRESHOLD, int, 0775);
+module_param(DISABLE_LOAD_THRESHOLD, int, 0775);
 
 static unsigned int history[SAMPLING_PERIODS];
 static unsigned int index;
