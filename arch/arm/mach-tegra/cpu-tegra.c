@@ -1034,7 +1034,7 @@ static struct notifier_block tegra_cpu_pm_notifier = {
 
 void rebuild_max_freq_table(max_rate)
 {
-	power_mode_table[SYSTEM_NORMAL_MODE] = 1500000;
+	power_mode_table[SYSTEM_NORMAL_MODE] = 1900000;
 	power_mode_table[SYSTEM_BALANCE_MODE] = 1300000;
 	power_mode_table[SYSTEM_PWRSAVE_MODE] = SYSTEM_PWRSAVE_MODE_MAX_FREQ;
 	power_mode_table[SYSTEM_OVERCLOCK_0P1G_MODE]=1900000;

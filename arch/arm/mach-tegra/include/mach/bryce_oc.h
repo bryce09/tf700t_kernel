@@ -10,12 +10,12 @@
 /*****************************/
 
 /* cap voltages */
-#define CPU_VOLTAGE_CAP         (1400)   /* mV */
-#define CORE_VOLTAGE_CAP        (1450)   /* mV */
+#define CPU_VOLTAGE_CAP         (1405)   /* mV */
+#define CORE_VOLTAGE_CAP        (1455)   /* mV */
 
 /* max and min voltages */
 
-#define MAX_CPU_VOLTAGE         (1325)   /* mV */
+#define MAX_CPU_VOLTAGE         (1400)   /* mV */
 
 
 #define MAX_CORE_VOLTAGE        (1450)   /* mV */
@@ -28,19 +28,19 @@
 /*****************************/
 
 /* cap frequencys */
-#define CPU_FREQUENCY_CAP       (1850)   /* MHz */
+#define CPU_FREQUENCY_CAP       (1900)   /* MHz */
 #define CORE_FREQUENCY_CAP      (750)    /* MHz */
 #define HOST1X_FREQUENCY_CAP \
         (DIV_ROUND_UP((CORE_FREQUENCY_CAP), 2)) /* MHz */
 
 /* max. frequencys */
-#define MAX_CPU_FREQUENCY       (1850)   /* MHz */
+#define MAX_CPU_FREQUENCY       (1900)   /* MHz */
 #define MAX_CORE_FREQUENCY      (750)    /* MHz */
 #define MAX_HOST1X_FREQUENCY    (350)    /* MHz */
 
-#define SYSTEM_NORMAL_MODE_FREQUENCY     (1500)    /* MHz */
+#define SYSTEM_NORMAL_MODE_FREQUENCY     (MAX_CPU_FREQUENCY)    /* MHz */
 #define SYSTEM_BALANCE_MODE_FREQUENCY    (1300)    /* MHz */
-#define SYSTEM_PWRSAVE_MODE_FREQUENCY    (1000)    /* MHz */
+#define SYSTEM_PWRSAVE_MODE_FREQUENCY    (768)    /* MHz */
 
 
 /* This is the table index for the max/oc/last gpu
