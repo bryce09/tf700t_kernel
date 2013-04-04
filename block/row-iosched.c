@@ -71,9 +71,9 @@ static const bool urgent_queues[] = {
 
 /* Default values for row queues quantums in each dispatch cycle */
 static const int queue_quantum[] = {
-	100,	/* ROWQ_PRIO_HIGH_READ */
+	10,	/* ROWQ_PRIO_HIGH_READ */
 	100,	/* ROWQ_PRIO_REG_READ */
-	2,	/* ROWQ_PRIO_HIGH_SWRITE */
+	1,	/* ROWQ_PRIO_HIGH_SWRITE */
 	1,	/* ROWQ_PRIO_REG_SWRITE */
 	1,	/* ROWQ_PRIO_REG_WRITE */
 	1,	/* ROWQ_PRIO_LOW_READ */
