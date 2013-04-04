@@ -86,7 +86,7 @@ static struct cpufreq_interactive_core_lock core_lock;
 
 
 /* Hi speed to bump to from lo speed when load burst (default max) */
-static u64 hispeed_freq;
+static u64 hispeed_freq = 702000;
 
 /* Boost frequency by boost_factor when CPU load at or above this value. */
 #define DEFAULT_GO_MAXSPEED_LOAD 90
