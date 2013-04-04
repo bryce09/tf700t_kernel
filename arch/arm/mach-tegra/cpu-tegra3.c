@@ -620,7 +620,7 @@ static int __init tegra_auto_hotplug_debug_init(void)
 		return -ENOMEM;
 
 	pm_qos_add_request(&min_cpu_req, PM_QOS_MIN_ONLINE_CPUS,
-			   (s32)2);
+			   PM_QOS_DEFAULT_VALUE);
 	pm_qos_add_request(&max_cpu_req, PM_QOS_MAX_ONLINE_CPUS,
 			   PM_QOS_DEFAULT_VALUE);
 
