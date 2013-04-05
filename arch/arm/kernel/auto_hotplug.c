@@ -53,7 +53,7 @@
  * SAMPLING_PERIODS * MIN_SAMPLING_RATE is the minimum
  * load history which will be averaged
  */
-#define SAMPLING_PERIODS	15
+#define SAMPLING_PERIODS	10
 #define INDEX_MAX_VALUE		(SAMPLING_PERIODS - 1)
 /*
  * MIN_SAMPLING_RATE is scaled based on num_online_cpus()
@@ -90,9 +90,9 @@ struct delayed_work hotplug_offline_work;
 struct work_struct hotplug_offline_all_work;
 struct work_struct hotplug_boost_online_work;
 
-static unsigned int ENABLE_ALL_LOAD_THRESHOLD __read_mostly = 375;
-static unsigned int ENABLE_LOAD_THRESHOLD __read_mostly = 275;
-static unsigned int DISABLE_LOAD_THRESHOLD __read_mostly = 125;
+static unsigned int ENABLE_ALL_LOAD_THRESHOLD __read_mostly = 400;
+static unsigned int ENABLE_LOAD_THRESHOLD __read_mostly = 225;
+static unsigned int DISABLE_LOAD_THRESHOLD __read_mostly = 150;
 
 module_param(ENABLE_ALL_LOAD_THRESHOLD, int, 0775);
 module_param(ENABLE_LOAD_THRESHOLD, int, 0775);
@@ -248,19 +248,28 @@ static void hotplug_online_single_work_fn(struct work_struct *work)
 			}
 		}
 	}
+
 	schedule_delayed_work_on(0, &hotplug_decision_work, MIN_SAMPLING_RATE);
 }
 
 static void hotplug_offline_work_fn(struct work_struct *work)
 {
 	int cpu;
+
+	if(cpu_online(3))
+		cpu_down(3);
+	if(cpu_online(2))
+		cpu_down(2);
+	if(cpu_online(1))
+		cpu_down(1);
+/*
 	for_each_online_cpu(cpu) {
 		if (cpu) {
 			cpu_down(cpu);
 			pr_info("auto_hotplug: CPU%d down.\n", cpu);
 			break;
 		}
-	}
+	}*/
 	schedule_delayed_work_on(0, &hotplug_decision_work, MIN_SAMPLING_RATE);
 }
 
