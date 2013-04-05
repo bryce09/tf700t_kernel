@@ -153,7 +153,7 @@ static int hp_state_set(const char *arg, const struct kernel_param *kp)
 
 	if (ret == 0) {
 		if ((hp_state == TEGRA_HP_DISABLED) &&
-		    (old_state != TEGRA_HP_DISABLED))
+		    (old_state != TEGRA_HP_DISABLED)) 
 			pr_info("Tegra auto-hotplug disabled\n");
 		else if (hp_state != TEGRA_HP_DISABLED) {
 			if (old_state == TEGRA_HP_DISABLED) {
@@ -282,7 +282,7 @@ static void tegra_auto_hotplug_work_func(struct work_struct *work)
 	mutex_lock(tegra3_cpu_lock);
 
 	switch (hp_state) {
-	case TEGRA_HP_DISABLED:
+	//case TEGRA_HP_DISABLED:
 	case TEGRA_HP_IDLE:
 		break;
 	case TEGRA_HP_DOWN:
