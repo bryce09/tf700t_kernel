@@ -3301,11 +3301,42 @@ static struct clk tegra_pll_ref = {
 };
 
 static struct clk_pll_freq_table tegra_pll_c_freq_table[] = {
-	{ 12000000, 1400000000, 700,  6, 1, 8},
-	{ 13000000, 1400000000, 969, 9, 1, 8},		/* actual: 1399.7 MHz */
-	{ 16800000, 1400000000, 583,  7, 1, 8},
-	{ 19200000, 1400000000, 533,  8, 1, 8},
-	{ 26000000, 1400000000, 700, 13, 1, 8},
+	 /* Only input_rate 26000000 is important! */
+
+	/* 800MHz GPU */
+	{ 12000000, 1600000000, 750,   6,  1, 8},
+	{ 13000000, 1600000000, 923,   8,  1, 8},
+	{ 16800000, 1600000000, 625,   7,  1, 8},
+	{ 19200000, 1600000000, 625,   8,  1, 8},
+	{ 26000000, 1600000000, 800,  13,  1, 8},
+
+	/* 775MHz GPU */
+	{ 12000000, 1550000000, 750,   6,  1, 8},
+	{ 13000000, 1550000000, 923,   8,  1, 8},
+	{ 16800000, 1550000000, 625,   7,  1, 8},
+	{ 19200000, 1550000000, 625,   8,  1, 8},
+	{ 26000000, 1550000000, 775,  13,  1, 8},
+
+	/* 750MHz GPU */
+	{ 12000000, 1500000000, 750,   6,  1, 8},
+	{ 13000000, 1500000000, 923,   8,  1, 8},
+	{ 16800000, 1500000000, 625,   7,  1, 8},
+	{ 19200000, 1500000000, 625,   8,  1, 8},
+	{ 26000000, 1500000000, 750,  13,  1, 8},
+
+    /* 700MHz GPU */
+    { 12000000, 1400000000, 700,   6,  1, 8},
+	{ 13000000, 1400000000, 969,   9,  1, 8},
+	{ 16800000, 1400000000, 500,   6,  1, 8},
+	{ 19200000, 1400000000, 875,  12,  1, 8},
+	{ 26000000, 1400000000, 700,  13,  1, 8},
+
+    /* 650MHz GPU */
+    { 12000000, 1300000000, 725,   6,  1, 8},
+	{ 13000000, 1300000000, 892,   8,  1, 8},
+	{ 16800000, 1300000000, 863,  10,  1, 8},	/* actual: 1449969230 Hz */
+	{ 19200000, 1300000000, 906,  12,  1, 8},	/* actual: 1449984000 Hz */
+	{ 26000000, 1300000000, 650,  13,  1, 8},
 
 	{ 12000000, 1200000000, 600,  6, 1, 8},
 	{ 13000000, 1200000000, 923, 10, 1, 8},		/* actual: 1199.9 MHz */
@@ -3357,14 +3388,14 @@ static struct clk tegra_pll_c = {
 	.ops       = &tegra_pll_ops,
 	.reg       = 0x80,
 	.parent    = &tegra_pll_ref,
-	.max_rate  = ( CORE_FREQUENCY_CAP * 1000000 * 2 ),
+	.max_rate  = ( CORE_FREQUENCY_CAP * 1000000 * 2 ) + 100000000,
 	.u.pll = {
 		.input_min = 2000000,
 		.input_max = 31000000,
 		.cf_min    = 1000000,
 		.cf_max    = 6000000,
 		.vco_min   = 20000000,
-		.vco_max   = ( CORE_FREQUENCY_CAP * 1000000 * 2 ),
+		.vco_max   = ( CORE_FREQUENCY_CAP * 1000000 * 2 ) + 100000000,
 		.freq_table = tegra_pll_c_freq_table,
 		.lock_delay = 300,
 	},
@@ -3377,7 +3408,7 @@ static struct clk tegra_pll_c_out1 = {
 	.parent    = &tegra_pll_c,
 	.reg       = 0x84,
 	.reg_shift = 0,
-	.max_rate  = ( CORE_FREQUENCY_CAP * 1000000 ),
+	.max_rate  = ( CORE_FREQUENCY_CAP * 1000000 ) + 100000000,
 };
 
 static struct clk_pll_freq_table tegra_pll_m_freq_table[] = {
@@ -3477,7 +3508,7 @@ static struct clk tegra_pll_p = {
 		.cf_min    = 1000000,
 		.cf_max    = 6000000,
 		.vco_min   = 20000000,
-		.vco_max   = 1400000000,
+		.vco_max   = (CORE_FREQUENCY_CAP * 1000000 * 2 ),
 		.freq_table = tegra_pll_p_freq_table,
 		.lock_delay = 300,
 	},
@@ -4052,7 +4083,7 @@ static struct clk tegra_clk_cclk_g = {
 	.inputs	= mux_cclk_g,
 	.reg	= 0x368,
 	.ops	= &tegra_super_ops,
-	.max_rate = 1900000000,
+	.max_rate = (CPU_FREQUENCY_CAP * 1000000 ),
 };
 
 static struct clk tegra_clk_cclk_lp = {
@@ -4107,7 +4138,7 @@ static struct clk tegra_clk_cpu_cmplx = {
 	.name      = "cpu",
 	.inputs    = mux_cpu_cmplx,
 	.ops       = &tegra_cpu_cmplx_ops,
-	.max_rate  = ( CPU_FREQUENCY_CAP * 1000000 ),
+	.max_rate  = ( CPU_FREQUENCY_CAP * 1000000 ) + 100000000,
 };
 
 static struct clk tegra_clk_cop = {
@@ -4312,7 +4343,7 @@ static struct clk tegra_clk_cbus = {
 	.name	   = "cbus",
 	.parent    = &tegra_pll_c,
 	.ops       = &tegra_clk_cbus_ops,
-	.max_rate  = ( CORE_FREQUENCY_CAP * 1000000 ),
+	.max_rate  = ( CORE_FREQUENCY_CAP * 1000000 ) + 100000000,
 	.mul	   = 1,
 	.div	   = CONFIG_TEGRA_CBUS_CLOCK_DIVIDER,
 	.flags     = PERIPH_ON_CBUS,
@@ -4476,7 +4507,7 @@ struct clk tegra_list_clks[] = {
 	PERIPH_CLK("i2cslow",	"i2cslow",		NULL,	81,	0x3fc,	26000000,  mux_pllp_pllc_clk32_clkm,	MUX | DIV_U71 | PERIPH_ON_APB),
 	PERIPH_CLK("pcie",	"tegra-pcie",		"pcie",	70,	0,	250000000, mux_clk_m, 			0),
 	PERIPH_CLK("afi",	"tegra-pcie",		"afi",	72,	0,	250000000, mux_clk_m, 			0),
-	PERIPH_CLK("se",	"se",			NULL,	127,	0x42c,	( CORE_FREQUENCY_CAP * 1000000 ), mux_pllp_pllc_pllm_clkm,	MUX | DIV_U71 | DIV_U71_INT | PERIPH_ON_APB),
+	PERIPH_CLK("se",	"se",			NULL,	127,	0x42c,	( CORE_FREQUENCY_CAP * 1000000 ) + 25000000, mux_pllp_pllc_pllm_clkm,	MUX | DIV_U71 | DIV_U71_INT | PERIPH_ON_APB),
 	PERIPH_CLK("mselect",	"mselect",		NULL,	99,	0x3b4,	108000000, mux_pllp_clkm,		MUX | DIV_U71),
 
 	SHARED_CLK("avp.sclk",	"tegra-avp",		"sclk",	&tegra_clk_sbus_cmplx, NULL, 0, 0),

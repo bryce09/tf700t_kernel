@@ -97,9 +97,9 @@ static int tegra3_get_core_floor_mv(int cpu_mv)
 		return core_millivolts[5];
 	if (cpu_mv < 1100)
 		return core_millivolts[5];
-	if (cpu_mv <= 1225)
+	if (cpu_mv < 1225)
 		return core_millivolts[7];
-   	if (cpu_mv > 1225 && cpu_mv < CPU_VOLTAGE_CAP)
+   	if (cpu_mv >= 1225 && cpu_mv < CPU_VOLTAGE_CAP)
 		return core_millivolts[CORE_MAXFREQ_IDX];
 	BUG();
 }
