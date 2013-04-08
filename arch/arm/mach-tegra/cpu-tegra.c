@@ -935,8 +935,7 @@ int tegra_cpu_set_speed_cap(unsigned int *speed_cap)
 		*speed_cap = new_speed;
 
 	ret = tegra_update_cpu_speed(new_speed);
-	if (ret == 0)
-		tegra_auto_hotplug_governor(new_speed, false);
+
 	return ret;
 }
 
@@ -1013,8 +1012,6 @@ static int tegra_pm_notify(struct notifier_block *nb, unsigned long event,
 		pr_info("Tegra cpufreq suspend: setting frequency to %d kHz\n",
 			freq_table[suspend_index].frequency);
 		tegra_update_cpu_speed(freq_table[suspend_index].frequency);
-		tegra_auto_hotplug_governor(
-			freq_table[suspend_index].frequency, true);
 	} else if (event == PM_POST_SUSPEND) {
 		unsigned int freq;
 		is_suspended = false;
@@ -1139,10 +1136,7 @@ static int __init tegra_cpufreq_init(void)
 	if (ret)
 		return ret;
 
-	ret = tegra_auto_hotplug_init(&tegra_cpu_lock);
-	if (ret)
-		return ret;
-	freq_table = table_data->freq_table;
+
 
 	for (i= 0; freq_table[i].frequency !=
 				CPUFREQ_TABLE_END; i++)
@@ -1165,7 +1159,6 @@ static void __exit tegra_cpufreq_exit(void)
 {
 	tegra_throttle_exit();
 	tegra_cpu_edp_exit();
-	tegra_auto_hotplug_exit();
 	cpufreq_unregister_driver(&tegra_cpufreq_driver);
 	cpufreq_unregister_notifier(
 		&tegra_cpufreq_policy_nb, CPUFREQ_POLICY_NOTIFIER);
