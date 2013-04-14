@@ -10,7 +10,7 @@
 /*****************************/
 
 /* cap voltages */
-#define CPU_VOLTAGE_CAP         (1405)   /* mV */
+#define CPU_VOLTAGE_CAP         (1445)   /* mV */
 #define CORE_VOLTAGE_CAP        (1465)   /* mV */
 
 /* max and min voltages */
@@ -18,7 +18,7 @@
 #define MAX_CPU_VOLTAGE         (1405)   /* mV */
 
 
-#define MAX_CORE_VOLTAGE        (1463)   /* mV */
+#define MAX_CORE_VOLTAGE        (1460)   /* mV */
 
 
 /*****************************/
@@ -53,7 +53,7 @@
 #define CPU_MAXFREQ_IDX   (39)
 /* Default gpu oc values after init is done */
 #define CORE_DEFAULT_OC_FREQUENCY  (700)    /* MHz */
-#define CORE_DEFAULT_OC_VOLT       (1410)   /* mV */
+#define CORE_DEFAULT_OC_VOLT       (1350)   /* mV */
 
 /*****************************/
 /*                           */
