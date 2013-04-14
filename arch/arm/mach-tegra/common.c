@@ -40,6 +40,8 @@
 #include <mach/system.h>
 #include <mach/tegra_smmu.h>
 
+#include <mach/bryce_oc.h>
+
 #include "apbio.h"
 #include "board.h"
 #include "clock.h"
@@ -101,7 +103,7 @@ static struct board_info pmu_board_info;
 static struct board_info display_board_info;
 static struct board_info camera_board_info;
 
-static int pmu_core_edp = 1450;	/* default 1.2V EDP limit */
+static int pmu_core_edp = CORE_VOLTAGE_CAP;	/* default 1.2V EDP limit */
 static int board_panel_type;
 static enum power_supply_type pow_supply_type = POWER_SUPPLY_TYPE_MAINS;
 
